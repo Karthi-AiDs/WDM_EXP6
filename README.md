@@ -20,73 +20,53 @@ sklearn to demonstrate Information Retrieval using the Vector Space Model.
 
 ### Program:
 ```
+
 import nltk
 nltk.download('punkt')
 nltk.download('punkt_tab')
 nltk.download('stopwords')
 
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
 import string
 
-# Sample documents
 documents = {
     "doc1": "This is the first document.",
     "doc2": "This document is the second document.",
     "doc3": "And this is the third one.",
-    "doc4": "Is this the first document?",
+    "doc4": "Is this the first document?"
 }
 
-# Preprocessing function to tokenize and remove stopwords/punctuation
-def preprocess_text(text):
-    tokens = word_tokenize(text.lower())
-    tokens = [token for token in tokens if token not in stopwords.words("english") and token not in string.punctuation]
-    return " ".join(tokens)
+def preprocess(text):
+    return " ".join(x for x in word_tokenize(text.lower())
+                    if x not in stopwords.words("english")
+                    and x not in string.punctuation)
 
-# Preprocess documents
-preprocessed_docs = [preprocess_text(doc) for doc in documents.values()]
+docs = [preprocess(x) for x in documents.values()]
 
-# Construct TF-IDF matrix
-tfidf_vectorizer = TfidfVectorizer()
-tfidf_matrix = tfidf_vectorizer.fit_transform(preprocessed_docs)
+vectorizer = TfidfVectorizer()
+matrix = vectorizer.fit_transform(docs)
 
-# Calculate cosine similarity between query and documents
-def search(query, tfidf_matrix, tfidf_vectorizer):
-    preprocessed_query = preprocess_text(query)
-    query_vector = tfidf_vectorizer.transform([preprocessed_query])
+query = preprocess(input("Enter query: "))
+query_vector = vectorizer.transform([query])
 
-    # Calculate cosine similarity between query and documents
-    similarity_scores = cosine_similarity(query_vector, tfidf_matrix)
+scores = cosine_similarity(query_vector, matrix)[0]
 
-    # Sort documents based on similarity scores
-    sorted_indexes = similarity_scores.argsort()[0][::-1]
-
-    # Return sorted documents along with their similarity scores
-    doc_keys = list(documents.keys())
-    results = [(doc_keys[i], similarity_scores[0, i]) for i in sorted_indexes]
-    return results
-
-# Example query
-query = input("Enter query: ")
-
-# Perform search
-search_results = search(query, tfidf_matrix, tfidf_vectorizer)
-
-# Display search results
-i = 1
-for result in search_results:
+for rank, i in enumerate(scores.argsort()[::-1], 1):
     print("----------------------")
-    print("\nRank: ", i)
-    print("Document:", result[0])
-    print("Similarity Score:", result[1])
-    i += 1
+    print("Rank:", rank)
+    print("Document:", list(documents)[i])
+    print("Similarity Score:", scores[i])
+
+
 ```
 
 
 ### Output:
-<img width="1139" height="599" alt="image" src="https://github.com/user-attachments/assets/fa2b856d-3cb6-4d54-adb9-09e829bddf3f" />
+
+<img width="503" height="410" alt="image" src="https://github.com/user-attachments/assets/b37a6f2d-c969-470b-808b-c7d3edda5646" />
 
 ### Result:
 Thus, the implementation of Information Retrieval Using Vector Space Model in Python is executed successfully.
